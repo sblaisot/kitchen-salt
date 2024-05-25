@@ -74,7 +74,8 @@ function linkFormulas() {
       do
         name=$(basename "$formula")
         if [[ ! -L "$SALT_ROOT/$name" ]]; then
-          ln -fs "$formula/$name" "$SALT_ROOT/$name"
+          # Using plain copy instead of symlink because salt 3005.5+ refuse to serve files outside of files_root
+          cp -r "$formula/$name" "$SALT_ROOT/$name"
         fi
         find "$formula" -maxdepth 1 -mindepth 1 -type d |grep -E "_(modules|states|grains|renderers|returners)" | xargs -I{} \
           basename {}| xargs -I{} cp -rs "$formula"/{} "$SALT_ROOT"/
@@ -83,7 +84,7 @@ function linkFormulas() {
 
     # form pkgs
     find "$SALT_ENV" -maxdepth 1 -mindepth 1 -path "*_formulas*" -prune -o -name "*" -type d -print0| xargs -I{} -0 -n1 --no-run-if-empty basename {} | xargs -I{} --no-run-if-empty \
-      ln -fs "$SALT_ENV"/{} "$SALT_ROOT"/{};
+      cp -r "$SALT_ENV"/{} "$SALT_ROOT"/{};
   fi
 
 }
